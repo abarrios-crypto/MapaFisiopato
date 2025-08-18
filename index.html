@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mapa Interactivo de Fisiopatología</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    margin: 20px;
+    padding: 0;
+  }
+  .container {
+    max-width: 900px;
+    margin: auto;
+  }
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  .map {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 30px;
+  }
+  .unit {
+    background: #3498db;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    transition: background 0.3s ease;
+    position: relative;
+  }
+  .unit:hover {
+    background: #2980b9;
+  }
+  .unit.active {
+    background: #2ecc71;
+    cursor: default;
+  }
+  .unit-number {
+    font-weight: bold;
+    font-size: 18px;
+    background: white;
+    color: #2980b9;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+  }
+  .unit-title {
+    font-size: 20px;
+    display: inline;
+    vertical-align: middle;
+  }
+  .unit-description {
+    margin-top: 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    font-size: 16px;
+  }
+  .unit.active .unit-description {
+    max-height: 200px; /* or adjust according to content */
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mapa Interactivo del Curso de Fisiopatología</h1>
+    <div class="map" id="map">
+
+      <!-- Unidades serán agregadas dinámicamente -->
+      
+    </div>
+  </div>
+
+<script>
+  const units = [
+    {
+      number: "I",
+      title: "Fundamentos de Fisiopatología",
+      description: `
+        Introducción a la fisiopatología, conceptos de salud, enfermedad, patogénesis, bases celulares y moleculares.
+      `
+    },
+    {
+      number: "II",
+      title: "Órganos y Sistemas en Fisiopatología",
+      description: `
+        Estudio general de fisiopatología por órganos y sistemas, marcadores relevantes para diagnóstico.
+      `
+    },
+    {
+      number: "III",
+      title: "Enfermedades y Trastornos Específicos",
+      description: `
+        Patología inmunológica, inflamatoria, enfermedades infecciosas, metabólicas, neurológicas y oncológicas.
+      `
+    },
+    {
+      number: "IV",
+      title: "Aplicaciones Clínicas y Terapéuticas",
+      description: `
+        Evaluación clínica, terapéutica basada en evidencia, prevención y promoción de la salud.
+      `
+    },
+    {
+      number: "V",
+      title: "Tópicos de Vanguardia en Fisiopatología",
+      description: `
+        Epigenética, microbiota, medicina personalizada, células madre, inflamación crónica, neurodegeneración y envejecimiento.
+      `
+    },
+  ];
+
+  const mapDiv = document.getElementById('map');
+
+  units.forEach((unit, index) => {
+    const div = document.createElement('div');
+    div.className = 'unit';
+    if(index === 0) div.classList.add('active'); // activar la primera unidad inicialmente
+
+    div.innerHTML = `
+      <span class="unit-number">${unit.number}</span>
+      <span class="unit-title">${unit.title}</span>
+      <div class="unit-description">${unit.description}</div>
+    `;
+
+    div.addEventListener('click', () => {
+      if(div.classList.contains('active')) return; // no hace nada si ya activado
+
+      // Desactivar todas
+      document.querySelectorAll('.unit').forEach(u => u.classList.remove('active'));
+
+      // Activar la cliqueada
+      div.classList.add('active');
+    });
+
+    mapDiv.appendChild(div);
+  });
+</script>
+
+</body>
+</html>
