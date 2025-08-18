@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mapa Interactivo: Fisiopatología</title>
+  <title>Encuadre: Fisiopatología</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    /* Estilos generales */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
@@ -26,16 +25,16 @@
       text-align: center;
       max-width: 800px;
       margin: 10px auto 30px;
+      font-size: 1.1em;
     }
 
-    /* Contenedor del tablero */
     #board-container {
       position: relative;
       width: 100%;
       margin: 40px auto;
     }
 
-    /* --- ESTILOS PARA PC (ESPIRAL) --- */
+    /* --- ESPACIO PARA EL ESPIRAL (PC) --- */
     .spiral-container {
       width: 800px;
       height: 800px;
@@ -48,7 +47,7 @@
       height: 90px;
     }
 
-    /* --- ESTILOS PARA MÓVIL (CAMINO VERTICAL) --- */
+    /* --- CAMINO VERTICAL (MÓVIL) --- */
     .mobile-path {
       display: none;
       max-width: 400px;
@@ -96,7 +95,7 @@
       font-size: 13px;
     }
 
-    /* Estilos comunes para todas las casillas */
+    /* Estilos comunes */
     .tile-spiral, .tile-mobile {
       border-radius: 12px;
       color: white;
@@ -120,10 +119,9 @@
     }
     .tile-spiral span, .tile-mobile span {
       font-size: 10px;
-      text-align: center;
     }
 
-    /* Meta final (común a ambos modos) */
+    /* Meta final */
     .center-goal, .final-goal {
       background: #d4af37;
       color: #000;
@@ -202,9 +200,9 @@
     }
     .topic-list li {
       margin: 8px 0;
-      line-height: 1.4;
+      line-height: 1.5;
     }
-    .btn-next {
+    .btn-next, .btn-contract, .btn-print {
       background: #005b96;
       color: white;
       border: none;
@@ -212,22 +210,62 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      margin-top: 15px;
+      margin: 10px 5px;
+      text-decoration: none;
+      display: inline-block;
     }
-    .btn-next:hover {
-      background: #0077cc;
+    .btn-contract {
+      background: #d4af37;
+      color: #000;
+    }
+    .btn-print {
+      background: #2e8b57;
+    }
+    .btn-next:hover, .btn-contract:hover, .btn-print:hover {
+      opacity: 0.9;
+    }
+
+    /* Contrato Modal */
+    .contract-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      overflow-y: auto;
+    }
+    .contract-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .signature-area {
+      border: 2px dashed #005b96;
+      height: 100px;
+      margin: 20px 0;
+      position: relative;
+      background: #f9f9f9;
+    }
+    .clear-signature {
+      font-size: 12px;
+      cursor: pointer;
+      color: #005b96;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
 
-  <h1 id="title">🌀 Camino del Conocimiento: Fisiopatología</h1>
-  <p class="subtitle">Avanza desde los fundamentos hasta la vanguardia. La meta final es dominar los mecanismos de la enfermedad.</p>
+  <h1 id="title">🌀 Encuadre: Fisiopatología</h1>
+  <p class="subtitle">Bienvenido al curso de Fisiopatología (Tercer semestre). Este tablero te guía por las unidades temáticas del programa. Avanza y conoce lo que aprenderás.</p>
 
-  <!-- Contenedor del tablero -->
-  <div id="board-container">
-    <!-- Aquí se generará el tablero (espiral o vertical) -->
-  </div>
+  <div id="board-container"></div>
 
   <!-- Modal -->
   <div class="modal" id="infoModal">
@@ -238,8 +276,45 @@
     </div>
   </div>
 
+  <!-- Modal del Contrato -->
+  <div class="contract-modal" id="contractModal">
+    <div class="contract-content" id="contractPrintArea">
+      <h2 style="text-align: center;">📜 Contrato de Compromiso del Estudiante</h2>
+      <p style="text-align: center;"><em>Unidad de Aprendizaje: Fisiopatología</em></p>
+      <br>
+      <p>Yo, <strong id="cNombre">_________________________</strong>, matrícula <span id="cMatricula">__________</span>, estudiante del <span id="cGrado">_______</span>, grupo <span id="cGrupo">___</span>, declaro bajo protesta de decir verdad que:</p>
+      <br>
+      <ol>
+        <li>He leído y comprendido el <strong>programa de estudio y encuadre</strong> de la unidad de aprendizaje de Fisiopatología.</li>
+        <li>Conozco las <strong>competencias</strong>, <strong>unidades temáticas</strong>, <strong>actividades</strong> y <strong>criterios de evaluación</strong> del curso.</li>
+        <li>Me comprometo a participar activamente, cumplir con las actividades y respetar el proceso enseñanza-aprendizaje.</li>
+        <li>Entiendo que el uso de TICs, el trabajo colaborativo y la ética académica son fundamentales en este curso.</li>
+      </ol>
+      <br>
+      <p>Por lo tanto, firmo el presente documento como acto de compromiso con mi formación biomédica.</p>
+      <br>
+      <p><strong>Lugar y fecha:</strong> Culiacán, Sinaloa, a <span id="cFecha">_______</span></p>
+      <br>
+      <p><strong>Firma del estudiante:</strong></p>
+      <div class="signature-area" id="signature-pad"></div>
+      <p class="clear-signature" onclick="clearSignature()">Borrar firma</p>
+      <p style="font-size: 12px; color: #555;">(Firma realizada de forma digital)</p>
+      <br>
+      <p><strong>Nombre:</strong> <span id="cNombre2">_________________________</span></p>
+      <p><strong>Matrícula:</strong> <span id="cMatricula2">__________</span></p>
+      <p><strong>Grado y grupo:</strong> <span id="cGradoGrupo">_______, grupo ___</span></p>
+    </div>
+    <div style="margin-top: 20px;">
+      <button class="btn-print" onclick="printContract()">🖨️ Imprimir Contrato</button>
+      <button class="btn-next" onclick="closeContract()">Cerrar</button>
+    </div>
+  </div>
+
   <script>
-    // Datos del tablero
+    // Canvas para firma
+    let canvas, ctx;
+    let isDrawing = false;
+
     const tiles = [
       { id: "inicio", label: "Inicio", sub: "", type: "normal", icon: "fa-home" },
       { id: "unidad1", label: "Unidad I", sub: "Fundamentos", type: "unit", icon: "fa-book" },
@@ -268,28 +343,25 @@
       { id: "V7", label: "META", sub: "Envejecimiento", type: "final", icon: "fa-hourglass-end" },
     ];
 
-    // Estado de desbloqueo
     const unlocked = { inicio: true };
     let lastUnlocked = "inicio";
-    let currentMode = ""; // 'spiral' o 'mobile'
+    let currentMode = "";
 
-    // Detectar dispositivo y renderizar
     function detectAndRender() {
       const container = document.getElementById("board-container");
-      container.innerHTML = ""; // Limpiar
+      container.innerHTML = "";
 
       if (window.innerWidth > 768) {
         renderSpiral();
         currentMode = "spiral";
-        document.getElementById("title").textContent = "🌀 Camino Espiral: Fisiopatología";
+        document.getElementById("title").textContent = "🌀 Encuadre: Fisiopatología";
       } else {
         renderMobilePath();
         currentMode = "mobile";
-        document.getElementById("title").textContent = "🚀 Torre del Conocimiento";
+        document.getElementById("title").textContent = "📚 Fisiopatología: Encuadre";
       }
     }
 
-    // Renderizar espiral (PC)
     function renderSpiral() {
       const container = document.createElement("div");
       container.className = "spiral-container";
@@ -298,7 +370,7 @@
       const radius = 350;
 
       tiles.forEach((tile, index) => {
-        if (tile.id === "V7") return; // Meta se agrega después
+        if (tile.id === "V7") return;
 
         const angle = (index / (tiles.length - 1)) * Math.PI * 4;
         const r = radius * (1 - index / (tiles.length + 4));
@@ -321,7 +393,6 @@
         el.style.top = `${y - 45}px`;
       });
 
-      // Meta final en el centro
       const goal = document.createElement("div");
       goal.className = `center-goal ${unlocked["V7"] ? "completed" : "locked"}`;
       goal.id = "tile-V7";
@@ -336,7 +407,6 @@
       document.getElementById("board-container").appendChild(container);
     }
 
-    // Renderizar camino vertical (móvil)
     function renderMobilePath() {
       const container = document.createElement("div");
       container.className = "mobile-path active";
@@ -356,7 +426,6 @@
         container.appendChild(el);
       });
 
-      // Meta final destacada
       const goal = document.createElement("div");
       goal.className = `final-goal ${unlocked["V7"] ? "completed" : "locked"}`;
       goal.id = "tile-V7";
@@ -371,10 +440,9 @@
       document.getElementById("board-container").appendChild(container);
     }
 
-    // Abrir modal con contenido
     function openModal(id) {
       if (!unlocked[id]) {
-        alert("🔒 Completa la casilla anterior para desbloquear este tema.");
+        alert("🔒 Este tema se desbloquea tras revisar el anterior en clase.");
         return;
       }
 
@@ -382,123 +450,85 @@
       const title = document.getElementById("modalTitle");
       const body = document.getElementById("modalBody");
 
-      // Contenido por casilla (puedes completar con más detalles si lo deseas)
       switch(id) {
         case "inicio":
-          title.textContent = "🚀 Bienvenido al Camino del Conocimiento";
+          title.textContent = " Bienvenido al Curso de Fisiopatología";
           body.innerHTML = `
-            <p>Este tablero te guiará a través del curso de <strong>Fisiopatología</strong> (Tercer semestre).</p>
-            <p><strong>🎯 Competencia:</strong> Comprender los mecanismos subyacentes de las enfermedades y aplicarlos en contextos clínicos e investigativos.</p>
-            <button class="btn-next" onclick="unlockNext('unidad1'); closeModal()">➡️ Comenzar: Unidad I</button>
+            <p><strong>Clave:</strong> No especificada</p>
+            <p><strong>Ubicación:</strong> Tercer semestre | Área: Ciencias de la Salud</p>
+            <p><strong>Horas:</strong> 80 teóricas + 32 prácticas + 32 estudio independiente = 144 horas | <strong>Créditos:</strong> 9</p>
+            <h3>📚 Competencia del curso</h3>
+            <p>El estudiante desarrollará habilidades para comprender los mecanismos subyacentes de las enfermedades. Aprenderá a analizar los procesos patológicos a nivel celular, molecular y sistémico. Además, será capaz de aplicar este conocimiento para identificar signos tempranos de enfermedades y proponer estrategias de prevención y tratamiento.</p>
+            <h3>🔗 Unidades relacionadas</h3>
+            <p>Morfología humana, bioquímica, fisiología, bioética y bioseguridad.</p>
+            <button class="btn-next" onclick="unlockNext('unidad1'); closeModal()">➡️ Continuar con Unidad I</button>
           `;
           break;
 
         case "unidad1":
           title.textContent = "Unidad I: Fundamentos de Fisiopatología";
           body.innerHTML = `
-            <ul class="topic-list">
-              <li><strong>I.1 Introducción:</strong> Concepto de fisiopatología, salud, enfermedad, patogénesis.</li>
-              <li><strong>I.2 Bases Celulares:</strong> Homeostasis, lesión celular, adaptación, mecanismos patogénicos.</li>
-            </ul>
+            <p>Esta unidad establece las bases conceptuales y moleculares de la enfermedad.</p>
             <button class="btn-next" onclick="unlockNext('I1'); closeModal()">➡️ Ir a I.1: Introducción</button>
           `;
           break;
 
         case "I1":
-          title.textContent = "I.1: Introducción a la Fisiopatología";
+          title.textContent = "I.1: Introducción a la Fisiopatología desde una perspectiva biomédica";
           body.innerHTML = `
             <ul class="topic-list">
-              <li>Concepto de fisiopatología</li>
-              <li>Salud, enfermedad, patogénesis y etiología</li>
-              <li>Síntoma, signo, síndrome</li>
-              <li>Fisiopatología y medicina basada en evidencia</li>
-              <li>En la investigación biomédica</li>
+              <li><strong>a) Concepto de fisiopatología:</strong> Estudio de los cambios funcionales que ocurren durante una enfermedad.</li>
+              <li><strong>b) Conceptos de salud, enfermedad, patogénesis y etiología:</strong> Definiciones y relaciones entre estos conceptos.</li>
+              <li><strong>c) Conceptos de síntoma, signo, síndrome y otros:</strong> Diferencias y relevancia clínica.</li>
+              <li><strong>d) Fisiopatología y la medicina basada en la evidencia:</strong> Rol de la fisiopatología en la toma de decisiones clínicas.</li>
+              <li><strong>e) La fisiopatología en la investigación biomédica:</strong> Aplicación de principios fisiopatológicos en estudios científicos.</li>
             </ul>
             <button class="btn-next" onclick="unlockNext('I2'); closeModal()">➡️ Siguiente: Bases celulares</button>
           `;
           break;
 
         case "I2":
-          title.textContent = "I.2: Bases Celulares y Moleculares";
+          title.textContent = "I.2: Bases Celulares y Moleculares de las Enfermedades";
           body.innerHTML = `
             <ul class="topic-list">
-              <li>Homeostasis y desequilibrios</li>
-              <li>Agentes lesivos y mecanismos de lesión</li>
-              <li>Mecanismos celulares de adaptación</li>
-              <li>Mecanismos patogénicos específicos</li>
+              <li><strong>a) Consideración de la homeostasis y desequilibrios:</strong> Mecanismos que mantienen la estabilidad y su alteración en la enfermedad.</li>
+              <li><strong>b) Agentes lesivos y mecanismos de lesión:</strong> Físicos, químicos, biológicos y genéticos.</li>
+              <li><strong>c) Mecanismos celulares de adaptación:</strong> Hipertrofia, hiperplasia, atrofia, metaplasia.</li>
+              <li><strong>d) Generalidades de los mecanismos patogénicos específicos:</strong> Apoptosis, necrosis, inflamación, disfunción metabólica.</li>
             </ul>
             <button class="btn-next" onclick="unlockNext('II'); closeModal()">➡️ Desbloquear Unidad II</button>
           `;
           break;
 
-        // Aquí puedes seguir agregando los casos restantes (II, III, IV, V...) con el mismo patrón
-        // Por brevedad, se omite el resto, pero sigue la lógica anterior.
-
-        case "V7":
-          if (!unlocked["V7"]) {
-            alert("🔒 Aún no has completado todas las unidades.");
-            return;
-          }
-          title.textContent = "🏆 ¡Meta Alcanzada! V.7: Fisiopatología del Envejecimiento";
+        case "II":
+          title.textContent = "Unidad II: Órganos y Sistemas en Fisiopatología";
           body.innerHTML = `
-            <p>Has completado todo el camino del conocimiento en Fisiopatología.</p>
-            <ul class="topic-list">
-              <li>Alteraciones celulares con la edad</li>
-              <li>Deterioro sistémico y vulnerabilidad</li>
-              <li>Enfermedades asociadas al envejecimiento</li>
-              <li>Investigación en longevidad y calidad de vida</li>
-            </ul>
-            <p>🎉 <strong>¡Felicidades, futuro biomédico!</strong> Estás listo para contribuir al bienestar de las comunidades con una base sólida en fisiopatología.</p>
+            <p>Enfoque integrado en sistemas corporales y herramientas diagnósticas.</p>
+            <button class="btn-next" onclick="unlockNext('II1'); closeModal()">➡️ Ir a II.1: Estudio general</button>
           `;
           break;
 
-        default:
-          title.textContent = `Tema: ${tiles.find(t => t.id === id)?.label} - ${tiles.find(t => t.id === id)?.sub}`;
-          body.innerHTML = `<p>Contenido disponible en desarrollo. Avanza en el tablero para desbloquearlo.</p>`;
-          const nextId = getNextId(id);
-          if (nextId) {
-            body.innerHTML += `<button class="btn-next" onclick="unlockNext('${nextId}'); closeModal()">➡️ Siguiente</button>`;
-          }
+        case "II1":
+          title.textContent = "II.1: Estudio general de la fisiopatología por órganos y sistemas";
+          body.innerHTML = `
+            <p>Análisis de la fisiopatología desde una perspectiva sistémica: cardiovascular, respiratorio, renal, nervioso, digestivo, endócrino, etc.</p>
+            <p>Se estudian las alteraciones funcionales comunes y específicas en cada sistema.</p>
+            <button class="btn-next" onclick="unlockNext('II2'); closeModal()">➡️ Siguiente: Marcadores</button>
+          `;
           break;
-      }
 
-      modal.style.display = "flex";
-    }
+        case "II2":
+          title.textContent = "II.2: Identificación de marcadores y procesos específicos relevantes para el diagnóstico clínico y la investigación biomédica";
+          body.innerHTML = `
+            <p>Uso de biomarcadores para diagnóstico clínico y monitoreo de enfermedades.</p>
+            <ul class="topic-list">
+              <li>Tipos de biomarcadores (genéticos, proteicos, metabólicos).</li>
+              <li>Aplicación en investigación biomédica.</li>
+              <li>Relación con procesos fisiopatológicos específicos.</li>
+            </ul>
+            <button class="btn-next" onclick="unlockNext('III'); closeModal()">➡️ Desbloquear Unidad III</button>
+          `;
+          break;
 
-    function closeModal() {
-      document.getElementById("infoModal").style.display = "none";
-    }
-
-    function unlockNext(id) {
-      unlocked[id] = true;
-      lastUnlocked = id;
-
-      // Actualizar interfaz
-      setTimeout(() => {
-        detectAndRender(); // Reconstruye el tablero con el nuevo estado
-      }, 100);
-
-      // Desbloquear siguiente
-      if (id === "V7") {
-        alert("🎉 ¡Has alcanzado la meta final del conocimiento en Fisiopatología!");
-      }
-    }
-
-    function getNextId(current) {
-      const index = tiles.findIndex(t => t.id === current);
-      if (index >= 0 && index < tiles.length - 1) {
-        return tiles[index + 1].id;
-      }
-      return null;
-    }
-
-    // Inicializar
-    window.onload = detectAndRender;
-    window.onresize = function() {
-      clearTimeout(window.resizeTimer);
-      window.resizeTimer = setTimeout(detectAndRender, 250);
-    };
-  </script>
-
-</body>
-</html>
+        case "III":
+          title.textContent = "Unidad III: Enfermeda
