@@ -1,152 +1,504 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mapa Interactivo de Fisiopatología</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    margin: 20px;
-    padding: 0;
-  }
-  .container {
-    max-width: 900px;
-    margin: auto;
-  }
-  h1 {
-    text-align: center;
-    color: #2c3e50;
-  }
-  .map {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    margin-top: 30px;
-  }
-  .unit {
-    background: #3498db;
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-    transition: background 0.3s ease;
-    position: relative;
-  }
-  .unit:hover {
-    background: #2980b9;
-  }
-  .unit.active {
-    background: #2ecc71;
-    cursor: default;
-  }
-  .unit-number {
-    font-weight: bold;
-    font-size: 18px;
-    background: white;
-    color: #2980b9;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 15px;
-  }
-  .unit-title {
-    font-size: 20px;
-    display: inline;
-    vertical-align: middle;
-  }
-  .unit-description {
-    margin-top: 10px;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease;
-    font-size: 16px;
-  }
-  .unit.active .unit-description {
-    max-height: 200px; /* or adjust according to content */
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mapa Interactivo: Fisiopatología</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Estilos generales */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    h1 {
+      color: #fff;
+      text-align: center;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+    }
+    .subtitle {
+      color: #ddd;
+      text-align: center;
+      max-width: 800px;
+      margin: 10px auto 30px;
+    }
+
+    /* Contenedor del tablero */
+    #board-container {
+      position: relative;
+      width: 100%;
+      margin: 40px auto;
+    }
+
+    /* --- ESTILOS PARA PC (ESPIRAL) --- */
+    .spiral-container {
+      width: 800px;
+      height: 800px;
+      margin: 60px auto;
+      position: relative;
+    }
+    .tile-spiral {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+    }
+
+    /* --- ESTILOS PARA MÓVIL (CAMINO VERTICAL) --- */
+    .mobile-path {
+      display: none;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .mobile-path.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      padding: 20px 0;
+    }
+    .tile-mobile {
+      width: 100%;
+      max-width: 360px;
+      height: 80px;
+      background: #005b96;
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 12px;
+      text-align: center;
+      padding: 8px;
+    }
+    .tile-mobile i {
+      font-size: 16px;
+    }
+    .tile-mobile.locked {
+      background: #555;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .tile-mobile.completed {
+      background: #2e8b57;
+    }
+    .tile-mobile.unit {
+      background: #003366;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    /* Estilos comunes para todas las casillas */
+    .tile-spiral, .tile-mobile {
+      border-radius: 12px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .tile-spiral:hover, .tile-mobile:hover:not(.locked) {
+      transform: scale(1.1);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }
+    .tile-spiral i, .tile-mobile i {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .tile-spiral strong, .tile-mobile strong {
+      font-size: 12px;
+    }
+    .tile-spiral span, .tile-mobile span {
+      font-size: 10px;
+      text-align: center;
+    }
+
+    /* Meta final (común a ambos modos) */
+    .center-goal, .final-goal {
+      background: #d4af37;
+      color: #000;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+      z-index: 20;
+    }
+    .center-goal {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .final-goal {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 360px;
+      height: 100px;
+      border-radius: 16px;
+      margin: 20px auto;
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.8); }
+      50% { box-shadow: 0 0 40px rgba(212, 175, 55, 1); }
+      100% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.8); }
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 700px;
+      text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #aaa;
+    }
+    .close:hover {
+      color: #000;
+    }
+    .topic-list {
+      margin: 15px 0;
+      padding-left: 20px;
+    }
+    .topic-list li {
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+    .btn-next {
+      background: #005b96;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+    .btn-next:hover {
+      background: #0077cc;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Mapa Interactivo del Curso de Fisiopatología</h1>
-    <div class="map" id="map">
 
-      <!-- Unidades serán agregadas dinámicamente -->
-      
+  <h1 id="title">🌀 Camino del Conocimiento: Fisiopatología</h1>
+  <p class="subtitle">Avanza desde los fundamentos hasta la vanguardia. La meta final es dominar los mecanismos de la enfermedad.</p>
+
+  <!-- Contenedor del tablero -->
+  <div id="board-container">
+    <!-- Aquí se generará el tablero (espiral o vertical) -->
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
     </div>
   </div>
 
-<script>
-  const units = [
-    {
-      number: "I",
-      title: "Fundamentos de Fisiopatología",
-      description: `
-        Introducción a la fisiopatología, conceptos de salud, enfermedad, patogénesis, bases celulares y moleculares.
-      `
-    },
-    {
-      number: "II",
-      title: "Órganos y Sistemas en Fisiopatología",
-      description: `
-        Estudio general de fisiopatología por órganos y sistemas, marcadores relevantes para diagnóstico.
-      `
-    },
-    {
-      number: "III",
-      title: "Enfermedades y Trastornos Específicos",
-      description: `
-        Patología inmunológica, inflamatoria, enfermedades infecciosas, metabólicas, neurológicas y oncológicas.
-      `
-    },
-    {
-      number: "IV",
-      title: "Aplicaciones Clínicas y Terapéuticas",
-      description: `
-        Evaluación clínica, terapéutica basada en evidencia, prevención y promoción de la salud.
-      `
-    },
-    {
-      number: "V",
-      title: "Tópicos de Vanguardia en Fisiopatología",
-      description: `
-        Epigenética, microbiota, medicina personalizada, células madre, inflamación crónica, neurodegeneración y envejecimiento.
-      `
-    },
-  ];
+  <script>
+    // Datos del tablero
+    const tiles = [
+      { id: "inicio", label: "Inicio", sub: "", type: "normal", icon: "fa-home" },
+      { id: "unidad1", label: "Unidad I", sub: "Fundamentos", type: "unit", icon: "fa-book" },
+      { id: "I1", label: "I.1", sub: "Introducción", type: "normal", icon: "fa-info-circle" },
+      { id: "I2", label: "I.2", sub: "Bases Celulares", type: "normal", icon: "fa-dna" },
+      { id: "II", label: "Unidad II", sub: "Órganos y Sistemas", type: "unit", icon: "fa-heartbeat" },
+      { id: "II1", label: "II.1", sub: "Estudio General", type: "normal", icon: "fa-network-wired" },
+      { id: "II2", label: "II.2", sub: "Marcadores", type: "normal", icon: "fa-vial" },
+      { id: "III", label: "Unidad III", sub: "Enfermedades", type: "unit", icon: "fa-notes-medical" },
+      { id: "III1", label: "III.1", sub: "Inmunológica", type: "normal", icon: "fa-shield-alt" },
+      { id: "III2", label: "III.2", sub: "Infecciosas", type: "normal", icon: "fa-bacteria" },
+      { id: "III3", label: "III.3", sub: "Metabólicas", type: "normal", icon: "fa-apple-alt" },
+      { id: "III4", label: "III.4", sub: "Neurológicas", type: "normal", icon: "fa-brain" },
+      { id: "III5", label: "III.5", sub: "Oncológicas", type: "normal", icon: "fa-radiation" },
+      { id: "IV", label: "Unidad IV", sub: "Aplicaciones", type: "unit", icon: "fa-stethoscope" },
+      { id: "IV1", label: "IV.1", sub: "Evaluación", type: "normal", icon: "fa-clipboard-check" },
+      { id: "IV2", label: "IV.2", sub: "Terapéutica", type: "normal", icon: "fa-pills" },
+      { id: "IV3", label: "IV.3", sub: "Prevención", type: "normal", icon: "fa-hands-wash" },
+      { id: "V", label: "Unidad V", sub: "Vanguardia", type: "unit", icon: "fa-flask" },
+      { id: "V1", label: "V.1", sub: "Epigenética", type: "normal", icon: "fa-gene" },
+      { id: "V2", label: "V.2", sub: "Microbiota", type: "normal", icon: "fa-seedling" },
+      { id: "V3", label: "V.3", sub: "Biomarcadores", type: "normal", icon: "fa-chart-line" },
+      { id: "V4", label: "V.4", sub: "Células Madre", type: "normal", icon: "fa-leaf" },
+      { id: "V5", label: "V.5", sub: "Inflamación", type: "normal", icon: "fa-fire" },
+      { id: "V6", label: "V.6", sub: "Neurodegeneración", type: "normal", icon: "fa-atom" },
+      { id: "V7", label: "META", sub: "Envejecimiento", type: "final", icon: "fa-hourglass-end" },
+    ];
 
-  const mapDiv = document.getElementById('map');
+    // Estado de desbloqueo
+    const unlocked = { inicio: true };
+    let lastUnlocked = "inicio";
+    let currentMode = ""; // 'spiral' o 'mobile'
 
-  units.forEach((unit, index) => {
-    const div = document.createElement('div');
-    div.className = 'unit';
-    if(index === 0) div.classList.add('active'); // activar la primera unidad inicialmente
+    // Detectar dispositivo y renderizar
+    function detectAndRender() {
+      const container = document.getElementById("board-container");
+      container.innerHTML = ""; // Limpiar
 
-    div.innerHTML = `
-      <span class="unit-number">${unit.number}</span>
-      <span class="unit-title">${unit.title}</span>
-      <div class="unit-description">${unit.description}</div>
-    `;
+      if (window.innerWidth > 768) {
+        renderSpiral();
+        currentMode = "spiral";
+        document.getElementById("title").textContent = "🌀 Camino Espiral: Fisiopatología";
+      } else {
+        renderMobilePath();
+        currentMode = "mobile";
+        document.getElementById("title").textContent = "🚀 Torre del Conocimiento";
+      }
+    }
 
-    div.addEventListener('click', () => {
-      if(div.classList.contains('active')) return; // no hace nada si ya activado
+    // Renderizar espiral (PC)
+    function renderSpiral() {
+      const container = document.createElement("div");
+      container.className = "spiral-container";
+      const centerX = 400;
+      const centerY = 400;
+      const radius = 350;
 
-      // Desactivar todas
-      document.querySelectorAll('.unit').forEach(u => u.classList.remove('active'));
+      tiles.forEach((tile, index) => {
+        if (tile.id === "V7") return; // Meta se agrega después
 
-      // Activar la cliqueada
-      div.classList.add('active');
-    });
+        const angle = (index / (tiles.length - 1)) * Math.PI * 4;
+        const r = radius * (1 - index / (tiles.length + 4));
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
 
-    mapDiv.appendChild(div);
-  });
-</script>
+        const el = document.createElement("div");
+        el.className = `tile-spiral ${tile.type === 'unit' ? 'unit' : ''} ${unlocked[tile.id] ? '' : 'locked'}`;
+        el.id = `tile-${tile.id}`;
+        el.onclick = () => openModal(tile.id);
+
+        el.innerHTML = `
+          <i class="fas ${tile.icon}"></i>
+          <strong>${tile.label}</strong>
+          <span>${tile.sub}</span>
+        `;
+
+        container.appendChild(el);
+        el.style.left = `${x - 45}px`;
+        el.style.top = `${y - 45}px`;
+      });
+
+      // Meta final en el centro
+      const goal = document.createElement("div");
+      goal.className = `center-goal ${unlocked["V7"] ? "completed" : "locked"}`;
+      goal.id = "tile-V7";
+      goal.onclick = () => openModal("V7");
+      goal.innerHTML = `
+        <i class="fas fa-trophy"></i>
+        <strong>META FINAL</strong>
+        <span>V.7: Envejecimiento</span>
+      `;
+      container.appendChild(goal);
+
+      document.getElementById("board-container").appendChild(container);
+    }
+
+    // Renderizar camino vertical (móvil)
+    function renderMobilePath() {
+      const container = document.createElement("div");
+      container.className = "mobile-path active";
+
+      tiles.forEach(tile => {
+        const el = document.createElement("div");
+        el.className = `tile-mobile ${tile.type === 'unit' ? 'unit' : ''} ${unlocked[tile.id] ? (tile.id === "V7" ? "completed" : "") : 'locked'}`;
+        el.id = `tile-${tile.id}`;
+        el.onclick = () => openModal(tile.id);
+
+        el.innerHTML = `
+          <i class="fas ${tile.icon}"></i>
+          <strong>${tile.label}</strong>
+          <span>${tile.sub}</span>
+        `;
+
+        container.appendChild(el);
+      });
+
+      // Meta final destacada
+      const goal = document.createElement("div");
+      goal.className = `final-goal ${unlocked["V7"] ? "completed" : "locked"}`;
+      goal.id = "tile-V7";
+      goal.onclick = () => openModal("V7");
+      goal.innerHTML = `
+        <i class="fas fa-trophy"></i>
+        <strong>🏆 META FINAL</strong>
+        <span>V.7: Fisiopatología del Envejecimiento</span>
+      `;
+      container.appendChild(goal);
+
+      document.getElementById("board-container").appendChild(container);
+    }
+
+    // Abrir modal con contenido
+    function openModal(id) {
+      if (!unlocked[id]) {
+        alert("🔒 Completa la casilla anterior para desbloquear este tema.");
+        return;
+      }
+
+      const modal = document.getElementById("infoModal");
+      const title = document.getElementById("modalTitle");
+      const body = document.getElementById("modalBody");
+
+      // Contenido por casilla (puedes completar con más detalles si lo deseas)
+      switch(id) {
+        case "inicio":
+          title.textContent = "🚀 Bienvenido al Camino del Conocimiento";
+          body.innerHTML = `
+            <p>Este tablero te guiará a través del curso de <strong>Fisiopatología</strong> (Tercer semestre).</p>
+            <p><strong>🎯 Competencia:</strong> Comprender los mecanismos subyacentes de las enfermedades y aplicarlos en contextos clínicos e investigativos.</p>
+            <button class="btn-next" onclick="unlockNext('unidad1'); closeModal()">➡️ Comenzar: Unidad I</button>
+          `;
+          break;
+
+        case "unidad1":
+          title.textContent = "Unidad I: Fundamentos de Fisiopatología";
+          body.innerHTML = `
+            <ul class="topic-list">
+              <li><strong>I.1 Introducción:</strong> Concepto de fisiopatología, salud, enfermedad, patogénesis.</li>
+              <li><strong>I.2 Bases Celulares:</strong> Homeostasis, lesión celular, adaptación, mecanismos patogénicos.</li>
+            </ul>
+            <button class="btn-next" onclick="unlockNext('I1'); closeModal()">➡️ Ir a I.1: Introducción</button>
+          `;
+          break;
+
+        case "I1":
+          title.textContent = "I.1: Introducción a la Fisiopatología";
+          body.innerHTML = `
+            <ul class="topic-list">
+              <li>Concepto de fisiopatología</li>
+              <li>Salud, enfermedad, patogénesis y etiología</li>
+              <li>Síntoma, signo, síndrome</li>
+              <li>Fisiopatología y medicina basada en evidencia</li>
+              <li>En la investigación biomédica</li>
+            </ul>
+            <button class="btn-next" onclick="unlockNext('I2'); closeModal()">➡️ Siguiente: Bases celulares</button>
+          `;
+          break;
+
+        case "I2":
+          title.textContent = "I.2: Bases Celulares y Moleculares";
+          body.innerHTML = `
+            <ul class="topic-list">
+              <li>Homeostasis y desequilibrios</li>
+              <li>Agentes lesivos y mecanismos de lesión</li>
+              <li>Mecanismos celulares de adaptación</li>
+              <li>Mecanismos patogénicos específicos</li>
+            </ul>
+            <button class="btn-next" onclick="unlockNext('II'); closeModal()">➡️ Desbloquear Unidad II</button>
+          `;
+          break;
+
+        // Aquí puedes seguir agregando los casos restantes (II, III, IV, V...) con el mismo patrón
+        // Por brevedad, se omite el resto, pero sigue la lógica anterior.
+
+        case "V7":
+          if (!unlocked["V7"]) {
+            alert("🔒 Aún no has completado todas las unidades.");
+            return;
+          }
+          title.textContent = "🏆 ¡Meta Alcanzada! V.7: Fisiopatología del Envejecimiento";
+          body.innerHTML = `
+            <p>Has completado todo el camino del conocimiento en Fisiopatología.</p>
+            <ul class="topic-list">
+              <li>Alteraciones celulares con la edad</li>
+              <li>Deterioro sistémico y vulnerabilidad</li>
+              <li>Enfermedades asociadas al envejecimiento</li>
+              <li>Investigación en longevidad y calidad de vida</li>
+            </ul>
+            <p>🎉 <strong>¡Felicidades, futuro biomédico!</strong> Estás listo para contribuir al bienestar de las comunidades con una base sólida en fisiopatología.</p>
+          `;
+          break;
+
+        default:
+          title.textContent = `Tema: ${tiles.find(t => t.id === id)?.label} - ${tiles.find(t => t.id === id)?.sub}`;
+          body.innerHTML = `<p>Contenido disponible en desarrollo. Avanza en el tablero para desbloquearlo.</p>`;
+          const nextId = getNextId(id);
+          if (nextId) {
+            body.innerHTML += `<button class="btn-next" onclick="unlockNext('${nextId}'); closeModal()">➡️ Siguiente</button>`;
+          }
+          break;
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("infoModal").style.display = "none";
+    }
+
+    function unlockNext(id) {
+      unlocked[id] = true;
+      lastUnlocked = id;
+
+      // Actualizar interfaz
+      setTimeout(() => {
+        detectAndRender(); // Reconstruye el tablero con el nuevo estado
+      }, 100);
+
+      // Desbloquear siguiente
+      if (id === "V7") {
+        alert("🎉 ¡Has alcanzado la meta final del conocimiento en Fisiopatología!");
+      }
+    }
+
+    function getNextId(current) {
+      const index = tiles.findIndex(t => t.id === current);
+      if (index >= 0 && index < tiles.length - 1) {
+        return tiles[index + 1].id;
+      }
+      return null;
+    }
+
+    // Inicializar
+    window.onload = detectAndRender;
+    window.onresize = function() {
+      clearTimeout(window.resizeTimer);
+      window.resizeTimer = setTimeout(detectAndRender, 250);
+    };
+  </script>
 
 </body>
 </html>
